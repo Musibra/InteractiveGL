@@ -4,27 +4,37 @@
 
 #ifndef CANVAS_H
 #define CANVAS_H
+
 #include "Background.h"
 #include "Triangle.h"
+#include "CanvasOverlayButton.h"
 #include <wx/glcanvas.h>
 #include <wx/dcclient.h>
 #include <memory>
+#include "constants.h"
+#include <wx/image.h>
 
 
 class Canvas : public wxGLCanvas {
 public:
-    explicit Canvas(wxWindow* parent);
+    Canvas(wxWindow* parent);
 
 private:
+    wxGLContext* context;
+    std::unique_ptr<Background> background;
+    std::shared_ptr<Triangle> triangle;
+    std::shared_ptr<CanvasOverlayButton> overlayButton;
+
+    GLuint buttonTexture = 0;
+    wxRect buttonRect;
+
+    void drawButton();
 
     void OnPaint(wxPaintEvent& event);
     void OnResize(wxSizeEvent& event);
-    std::unique_ptr<wxGLContext> context;
-    std::unique_ptr<Background> background;
-    std::shared_ptr<Triangle> triangle;
+    void OnMouse(wxMouseEvent& event);
 
-    DECLARE_EVENT_TABLE()
+    wxDECLARE_EVENT_TABLE();
 };
-
 
 #endif //CANVAS_H

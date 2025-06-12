@@ -6,12 +6,12 @@
 #include <iostream>
 
 Triangle::Triangle() {
-    // 3 vertex: position(x,y), color(r,g,b)
+
     vBuffer = {
         // x,    y,     r,    g,    b
-         0.0f, 0.5f,  1.0f, 0.0f, 0.0f, // üst, kırmızı
-        -0.5f,-0.5f,  0.0f, 1.0f, 0.0f, // sol alt, yeşil
-         0.5f,-0.5f,  0.0f, 0.0f, 1.0f  // sağ alt, mavi
+         0.0f, 0.5f,  0.7f, 0.5f, 0.3f,
+        -0.5f,-0.5f,  0.7f, 0.5f, 0.3f,
+         0.5f,-0.5f,  0.7f, 0.5f, 0.3f,
     };
     initGL();
 }

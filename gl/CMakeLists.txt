@@ -7,6 +7,9 @@ set(SOURCE_FILES
 
         ${CMAKE_CURRENT_SOURCE_DIR}/Triangle.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Triangle.h
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/CanvasOverlayButton.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/CanvasOverlayButton.h
 )
 
 

@@ -13,6 +13,7 @@ target_include_directories(glad PUBLIC ${GLAD_DIR}/include)
 
 set(SOURCES
         main.cpp
+        constants.h
 )
 
 if (WIN32)
@@ -33,6 +34,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glm)
 
 target_include_directories(InteractiveGL PUBLIC ${GLAD_DIR}/include)
+target_include_directories(InteractiveGL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 
 target_link_libraries(InteractiveGL
         wx::net
@@ -57,3 +60,10 @@ if (WIN32)
         )
     endforeach()
 endif()
+
+# copy assets to the build directory
+add_custom_command(TARGET InteractiveGL POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:InteractiveGL>/assets
+)
