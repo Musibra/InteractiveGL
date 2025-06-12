@@ -18,6 +18,8 @@
 class Canvas : public wxGLCanvas {
 public:
     Canvas(wxWindow* parent);
+    std::function<void()> onButtonClick;
+    void setButtonCallback(std::function<void()> cb);
 
 private:
     wxGLContext* context;

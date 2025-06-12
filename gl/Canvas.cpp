@@ -49,7 +49,6 @@ void Canvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
     triangle->draw();
     overlayButton->draw(GetSize().x, GetSize().y);
 
-
     SwapBuffers();
 }
 
@@ -61,7 +60,6 @@ void Canvas::OnResize(wxSizeEvent& event) {
     int buttonWidth = 24;
     int buttonHeight = 24;
 
-
     int buttonX = size.x - buttonWidth - 10;
     int buttonY = 10;
 
@@ -71,11 +69,16 @@ void Canvas::OnResize(wxSizeEvent& event) {
     Refresh();
 }
 
+void Canvas::setButtonCallback(std::function<void()> cb) {
+    onButtonClick = cb;
+}
+
 void Canvas::OnMouse(wxMouseEvent& event) {
     wxPoint pos = event.GetPosition();
 
     if (buttonRect.Contains(pos)) {
-        std::cout << "Button clicked at: " << pos.x << ", " << pos.y << std::endl;
+        if (onButtonClick) {
+            onButtonClick();
+        }
     }
 }
-
