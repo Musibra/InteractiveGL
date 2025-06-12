@@ -1,6 +1,13 @@
-#include <iostream>
+#include <wx/wx.h>
+#include "MainWindow.h"
 
-int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
-}
+class App : public wxApp {
+public:
+    bool OnInit() override {
+        auto mainWindow = new MainWindow("Interactive GL");
+        mainWindow->Show();
+        return true;
+    }
+};
+
+wxIMPLEMENT_APP(App);
