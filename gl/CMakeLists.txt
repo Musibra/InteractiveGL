@@ -10,6 +10,9 @@ set(SOURCE_FILES
 
         ${CMAKE_CURRENT_SOURCE_DIR}/CanvasOverlayButton.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/CanvasOverlayButton.h
+
+        ${CMAKE_CURRENT_SOURCE_DIR}/Camera.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Camera.h
 )
 
 

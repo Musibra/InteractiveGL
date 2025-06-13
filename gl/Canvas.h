@@ -13,6 +13,7 @@
 #include <memory>
 #include "constants.h"
 #include <wx/image.h>
+#include "Camera.h"
 
 
 class Canvas : public wxGLCanvas {
@@ -20,6 +21,8 @@ public:
     Canvas(wxWindow* parent);
     std::function<void()> onButtonClick;
     void setButtonCallback(std::function<void()> cb);
+
+    void rotateObjectAroundZAxis(float angle);
 
 private:
     wxGLContext* context;
@@ -35,6 +38,13 @@ private:
     void OnPaint(wxPaintEvent& event);
     void OnResize(wxSizeEvent& event);
     void OnMouse(wxMouseEvent& event);
+
+    glm::mat4 modelMatrix;
+    glm::mat4 viewMatrix;
+    glm::mat4 projectionMatrix;
+
+    std::shared_ptr<Camera> camera;
+    float zOffset{-2.0f}; // Initial Z offset for the model
 
     wxDECLARE_EVENT_TABLE();
 };

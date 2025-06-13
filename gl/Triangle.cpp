@@ -1,17 +1,13 @@
-//
-// Created by Mustafa İbrahim on 6/12/2025.
-//
-
 #include "Triangle.h"
 #include <iostream>
+#include <glm/gtc/type_ptr.hpp>
 
 Triangle::Triangle() {
-
     vBuffer = {
-        // x,    y,     r,    g,    b
-         0.0f, 0.5f,  0.7f, 0.5f, 0.3f,
-        -0.5f,-0.5f,  0.7f, 0.5f, 0.3f,
-         0.5f,-0.5f,  0.7f, 0.5f, 0.3f,
+        //  x     y     z     r     g     b
+         0.0f,  0.5f, 0.0f,  0.7f, 0.5f, 0.3f,
+        -0.5f, -0.5f, 0.0f,  0.7f, 0.5f, 0.3f,
+         0.5f, -0.5f, 0.0f,  0.7f, 0.5f, 0.3f,
     };
     initGL();
 }
@@ -25,24 +21,30 @@ Triangle::~Triangle() {
 void Triangle::initGL() {
     const char* vertSrc = R"(
         #version 330 core
-        layout(location = 0) in vec2 vertexPosition;
-        layout(location = 1) in vec3 vertexColor;
+        layout(location = 0) in vec3 aPos;
+        layout(location = 1) in vec3 aColor;
 
-        out vec3 fragColor;
+        uniform mat4 u_ModelMatrix;
+        uniform mat4 u_ProjectionMatrix;
+        uniform mat4 u_ViewMatrix;
+        out vec3 ourColor;
 
-        void main() {
-            gl_Position = vec4(vertexPosition, 0.0, 1.0);
-            fragColor = vertexColor;
+        void main()
+        {
+            vec4 newPos = u_ProjectionMatrix * u_ViewMatrix * u_ModelMatrix * vec4(aPos, 1.0f);
+            gl_Position = newPos;
+            ourColor = aColor;
         }
     )";
 
     const char* fragSrc = R"(
         #version 330 core
-        in vec3 fragColor;
-        out vec4 outColor;
+        out vec4 FragColor;
+        in vec3 ourColor;
 
-        void main() {
-            outColor = vec4(fragColor, 1.0);
+        void main()
+        {
+            FragColor = vec4(ourColor.r, ourColor.g, ourColor.b, 1.0f);
         }
     )";
 
@@ -56,35 +58,42 @@ void Triangle::initGL() {
     glGenBuffers(1, &vbo);
 
     glBindVertexArray(vao);
-
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vBuffer.size() * sizeof(float), vBuffer.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    // Pozisyon: 3 float (vec3)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+    // Renk: 3 float (vec3)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
-void Triangle::draw() {
+void Triangle::draw(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection) {
     glUseProgram(shaderProgram);
+
+    GLint modelLoc = glGetUniformLocation(shaderProgram, "u_ModelMatrix");
+    GLint viewLoc = glGetUniformLocation(shaderProgram, "u_ViewMatrix");
+    GLint projLoc = glGetUniformLocation(shaderProgram, "u_ProjectionMatrix");
+
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
+
     glUseProgram(0);
 }
 
+
 GLuint Triangle::compileShader(GLenum type, const char* src) {
     GLuint shader = glCreateShader(type);
-    if (shader == 0) {
-        std::cerr << "Error: Failed to create shader." << std::endl;
-        return 0;
-    }
-
     glShaderSource(shader, 1, &src, nullptr);
     glCompileShader(shader);
 

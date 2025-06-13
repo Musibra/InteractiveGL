@@ -9,4 +9,10 @@ namespace Constants {
             0
         };
     }
+    namespace OverlayButton {
+        constexpr int BUTTON_WIDTH = 24;
+        constexpr int BUTTON_HEIGHT = 24;
+        constexpr int BUTTON_OFFSET_X = 10;
+        constexpr int BUTTON_OFFSET_Y = 10;
+    }
 }
