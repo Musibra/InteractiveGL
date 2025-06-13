@@ -1,6 +1,6 @@
 # InteractiveGL
 
-InteractiveGL is a C++ application that demonstrates OpenGL rendering with a wxWidgets-based GUI. It supports loading assets and shaders, and provides interactive control over 3D transformations such as scaling and rotation.
+InteractiveGL is a C++ application that demonstrates OpenGL rendering with a wxWidgets-based GUI. It provides interactive control over 3D transformations such as scaling and rotation.
 
 ---
 
@@ -8,7 +8,7 @@ InteractiveGL is a C++ application that demonstrates OpenGL rendering with a wxW
 
 This project depends on the following libraries and tools:
 
-- **C++20** compatible compiler (e.g., GCC, Clang, MSVC)
+- **C++20** compatible compiler (e.g., MSVC)
 - **CMake** version 3.28 or newer
 - **wxWidgets** — included locally in `thirdparty/wxWidgets`
 - **GLAD** — OpenGL function loader, included in `thirdparty/glad`
