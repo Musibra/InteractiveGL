@@ -14,15 +14,19 @@
 #include "constants.h"
 #include <wx/image.h>
 #include "Camera.h"
+#include <utility>
 
 
 class Canvas : public wxGLCanvas {
 public:
-    Canvas(wxWindow* parent);
+    explicit Canvas(wxWindow* parent);
     std::function<void()> onButtonClick;
     void setButtonCallback(std::function<void()> cb);
 
     void rotateObjectAroundZAxis(float angle);
+    void setScale(float scale);
+    void setShowTriangle(bool show);
+    void updateModelMatrix();
 
 private:
     wxGLContext* context;
@@ -33,19 +37,20 @@ private:
     GLuint buttonTexture = 0;
     wxRect buttonRect;
 
-    void drawButton();
 
     void OnPaint(wxPaintEvent& event);
     void OnResize(wxSizeEvent& event);
     void OnMouse(wxMouseEvent& event);
 
-    glm::mat4 modelMatrix;
-    glm::mat4 viewMatrix;
-    glm::mat4 projectionMatrix;
+    glm::mat4 modelMatrix{};
+    glm::mat4 viewMatrix{};
+    glm::mat4 projectionMatrix{};
 
     std::shared_ptr<Camera> camera;
     float zOffset{-2.0f}; // Initial Z offset for the model
-
+    float currentAngle{0};
+    float currentScale{1};
+    bool showTriangle{true};
     wxDECLARE_EVENT_TABLE();
 };
 

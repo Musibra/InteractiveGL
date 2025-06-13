@@ -7,6 +7,7 @@
 #include <glad/glad.h>
 #include <vector>
 #include <iostream>
+#include "ShaderLoader.h"
 
 
 class Background {
@@ -14,9 +15,7 @@ public:
     Background();
     ~Background();
 
-    void draw();
-    void setBackGroundColorWhite();
-    void setBackGroundColorDark();
+    void draw() const;
     void initGL();
 
 private:

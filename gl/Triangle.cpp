@@ -1,13 +1,11 @@
 #include "Triangle.h"
-#include <iostream>
-#include <glm/gtc/type_ptr.hpp>
 
 Triangle::Triangle() {
     vBuffer = {
         //  x     y     z     r     g     b
-         0.0f,  0.5f, 0.0f,  0.7f, 0.5f, 0.3f,
-        -0.5f, -0.5f, 0.0f,  0.7f, 0.5f, 0.3f,
-         0.5f, -0.5f, 0.0f,  0.7f, 0.5f, 0.3f,
+        0.0f, 0.5f, 0.0f, 0.7f, 0.5f, 0.3f,
+        -0.5f, -0.5f, 0.0f, 0.7f, 0.5f, 0.3f,
+        0.5f, -0.5f, 0.0f, 0.7f, 0.5f, 0.3f,
     };
     initGL();
 }
@@ -19,37 +17,15 @@ Triangle::~Triangle() {
 }
 
 void Triangle::initGL() {
-    const char* vertSrc = R"(
-        #version 330 core
-        layout(location = 0) in vec3 aPos;
-        layout(location = 1) in vec3 aColor;
+    std::string vertSrc = ShaderLoader::getShaderCode("shaders/Triangle.vert");
+    std::string fragSrc = ShaderLoader::getShaderCode("shaders/Triangle.frag");
 
-        uniform mat4 u_ModelMatrix;
-        uniform mat4 u_ProjectionMatrix;
-        uniform mat4 u_ViewMatrix;
-        out vec3 ourColor;
+    // print the shader source code for debugging
+    std::cout << "Vertex Shader Source:\n" << vertSrc << std::endl;
+    std::cout << "Fragment Shader Source:\n" << fragSrc << std::endl;
 
-        void main()
-        {
-            vec4 newPos = u_ProjectionMatrix * u_ViewMatrix * u_ModelMatrix * vec4(aPos, 1.0f);
-            gl_Position = newPos;
-            ourColor = aColor;
-        }
-    )";
-
-    const char* fragSrc = R"(
-        #version 330 core
-        out vec4 FragColor;
-        in vec3 ourColor;
-
-        void main()
-        {
-            FragColor = vec4(ourColor.r, ourColor.g, ourColor.b, 1.0f);
-        }
-    )";
-
-    shaderProgram = linkProgram(vertSrc, fragSrc);
-    if (!shaderProgram) {
+    shaderProgram = linkProgram(vertSrc.c_str(), fragSrc.c_str());
+    if(!shaderProgram) {
         std::cerr << "Shader program failed to compile/link!" << std::endl;
         return;
     }
@@ -62,18 +38,18 @@ void Triangle::initGL() {
     glBufferData(GL_ARRAY_BUFFER, vBuffer.size() * sizeof(float), vBuffer.data(), GL_STATIC_DRAW);
 
     // Pozisyon: 3 float (vec3)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
 
     // Renk: 3 float (vec3)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
 
-void Triangle::draw(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection) {
+void Triangle::draw(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection) const {
     glUseProgram(shaderProgram);
 
     GLint modelLoc = glGetUniformLocation(shaderProgram, "u_ModelMatrix");
@@ -99,7 +75,7 @@ GLuint Triangle::compileShader(GLenum type, const char* src) {
 
     GLint status = 0;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if (status != GL_TRUE) {
+    if(status != GL_TRUE) {
         GLint logLength = 0;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
         std::vector<char> buffer(logLength > 0 ? logLength : 512);
@@ -114,10 +90,10 @@ GLuint Triangle::compileShader(GLenum type, const char* src) {
 
 GLuint Triangle::linkProgram(const char* vertSrc, const char* fragSrc) {
     GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertSrc);
-    if (!vertexShader) return 0;
+    if(!vertexShader) return 0;
 
     GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragSrc);
-    if (!fragmentShader) {
+    if(!fragmentShader) {
         glDeleteShader(vertexShader);
         return 0;
     }
@@ -129,7 +105,7 @@ GLuint Triangle::linkProgram(const char* vertSrc, const char* fragSrc) {
 
     GLint status;
     glGetProgramiv(program, GL_LINK_STATUS, &status);
-    if (status != GL_TRUE) {
+    if(status != GL_TRUE) {
         char buffer[512];
         glGetProgramInfoLog(program, 512, nullptr, buffer);
         std::cerr << "Program link error: " << buffer << std::endl;

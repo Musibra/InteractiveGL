@@ -6,11 +6,8 @@
 #define CANVASOVERLAYBUTTON_H
 
 #include <glad/glad.h>
-#include <wx/glcanvas.h>
 #include <string>
 #include <iostream>
-#include <vector>
-#include <wx/image.h>
 
 class CanvasOverlayButton {
 public:
@@ -21,7 +18,7 @@ public:
     void draw(int windowWidth, int windowHeight);
     void setPosition(int x, int y);
     void toggle();
-    bool hitTest(int mouseX, int mouseY) const;
+    [[nodiscard]] bool hitTest(int mouseX, int mouseY) const;
 
 private:
     int posX, posY;
@@ -32,12 +29,10 @@ private:
     GLuint texture1 = 0, texture2 = 0;
     bool toggled = false;
 
-    bool loadTextureFromFile(const std::string& filePath, GLuint& outTexture);
+    static bool loadTextureFromFile(const std::string& filePath, GLuint& outTexture);
     GLuint compileShader(GLenum type, const char* src);
     GLuint linkProgram(const char* vertSrc, const char* fragSrc);
 };
-
-
 
 
 #endif //CANVASOVERLAYBUTTON_H

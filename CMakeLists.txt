@@ -67,3 +67,19 @@ add_custom_command(TARGET InteractiveGL POST_BUILD
         ${CMAKE_SOURCE_DIR}/assets
         $<TARGET_FILE_DIR:InteractiveGL>/assets
 )
+
+# copy shader files to build directory
+file(GLOB SHADER_FILES
+        "${CMAKE_SOURCE_DIR}/gl/shaders/*.frag"
+        "${CMAKE_SOURCE_DIR}/gl/shaders/*.vert"
+)
+
+foreach(SHADER_FILE ${SHADER_FILES})
+    get_filename_component(SHADER_NAME ${SHADER_FILE} NAME)
+    add_custom_command(
+            TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${SHADER_FILE}
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/shaders/${SHADER_NAME}
+    )
+endforeach()

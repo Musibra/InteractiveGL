@@ -4,6 +4,7 @@
 
 #include "Canvas.h"
 
+
 wxBEGIN_EVENT_TABLE(Canvas, wxGLCanvas)
     EVT_PAINT(Canvas::OnPaint)
     EVT_SIZE(Canvas::OnResize)
@@ -11,12 +12,11 @@ wxBEGIN_EVENT_TABLE(Canvas, wxGLCanvas)
 wxEND_EVENT_TABLE()
 
 Canvas::Canvas(wxWindow* parent)
-    : wxGLCanvas(parent, wxID_ANY, Constants::OpenGL::attribs), context(new wxGLContext(this))
-{
-    SetBackgroundStyle(wxBG_STYLE_PAINT);
+    : wxGLCanvas(parent, wxID_ANY, Constants::OpenGL::attribs), context(new wxGLContext(this)) {
+    wxWindowBase::SetBackgroundStyle(wxBG_STYLE_PAINT);
     SetCurrent(*context);
 
-    if (!gladLoadGL()) {
+    if(!gladLoadGL()) {
         std::cerr << "glad failed to initialize!" << std::endl;
         return;
     }
@@ -31,7 +31,7 @@ Canvas::Canvas(wxWindow* parent)
         100.0f // far plane
     );
     // set up view matrix
-    viewMatrix =  glm::mat4(1.0f);
+    viewMatrix = glm::mat4(1.0f);
     // set up model matrix
     modelMatrix = glm::mat4(1.0f); // Identity matrix for initial state
     modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, zOffset));
@@ -41,38 +41,37 @@ Canvas::Canvas(wxWindow* parent)
     this->triangle = std::make_shared<Triangle>();
 
     this->overlayButton = std::make_shared<CanvasOverlayButton>(10, 10, 24, 24);
-    if (!this->overlayButton->initGL()) {
+    if(!this->overlayButton->initGL()) {
         std::cerr << "Failed to initialize overlay button!" << std::endl;
         return;
     }
 
-    wxSize size = GetSize();
+    const wxSize size = GetSize();
     buttonRect = wxRect(
         size.x - Constants::OverlayButton::BUTTON_OFFSET_X - Constants::OverlayButton::BUTTON_WIDTH,
         Constants::OverlayButton::BUTTON_OFFSET_Y,
         Constants::OverlayButton::BUTTON_WIDTH,
         Constants::OverlayButton::BUTTON_HEIGHT
     );
-
 }
-
 
 void Canvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
     wxPaintDC dc(this);
     SetCurrent(*context);
-
     glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     background->draw();
-    triangle->draw(modelMatrix, viewMatrix, projectionMatrix);
+    if(showTriangle) {
+        triangle->draw(modelMatrix, viewMatrix, projectionMatrix);
+    }
     overlayButton->draw(GetSize().x, GetSize().y);
 
     SwapBuffers();
 }
 
 void Canvas::OnResize(wxSizeEvent& event) {
-    wxSize size = event.GetSize();
+    const wxSize size = event.GetSize();
     SetCurrent(*context);
     glViewport(0, 0, size.x, size.y);
 
@@ -82,30 +81,44 @@ void Canvas::OnResize(wxSizeEvent& event) {
 
     // update the button position
     buttonRect = wxRect(size.x - Constants::OverlayButton::BUTTON_OFFSET_X - Constants::OverlayButton::BUTTON_WIDTH,
-        Constants::OverlayButton::BUTTON_OFFSET_Y,
-        Constants::OverlayButton::BUTTON_WIDTH,
-        Constants::OverlayButton::BUTTON_HEIGHT);
-    overlayButton->setPosition(size.x - Constants::OverlayButton::BUTTON_OFFSET_X - Constants::OverlayButton::BUTTON_WIDTH, Constants::OverlayButton::BUTTON_OFFSET_Y);
+                        Constants::OverlayButton::BUTTON_OFFSET_Y,
+                        Constants::OverlayButton::BUTTON_WIDTH,
+                        Constants::OverlayButton::BUTTON_HEIGHT);
+    overlayButton->setPosition(
+        size.x - Constants::OverlayButton::BUTTON_OFFSET_X - Constants::OverlayButton::BUTTON_WIDTH,
+        Constants::OverlayButton::BUTTON_OFFSET_Y);
 
     Refresh();
 }
 
 void Canvas::setButtonCallback(std::function<void()> cb) {
-    onButtonClick = cb;
+    onButtonClick = std::move(cb);
 }
 
 void Canvas::rotateObjectAroundZAxis(float angle) {
+    currentAngle = angle;
+    updateModelMatrix();
+}
+
+void Canvas::setScale(const float scale) {
+    currentScale = scale;
+    updateModelMatrix();
+}
+
+void Canvas::updateModelMatrix() {
     modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, zOffset));
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(currentAngle), glm::vec3(0.0f, 0.0f, 1.0f));
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(currentScale, currentScale, currentScale));
+}
+
+void Canvas::setShowTriangle(bool show) {
+    showTriangle = show;
+    Refresh();
 }
 
 void Canvas::OnMouse(wxMouseEvent& event) {
-    wxPoint pos = event.GetPosition();
-
-    if (buttonRect.Contains(pos)) {
-        if (onButtonClick) {
-            onButtonClick();
-            overlayButton->toggle();
-        }
+    if(const wxPoint pos = event.GetPosition(); buttonRect.Contains(pos) && onButtonClick) {
+        onButtonClick();
+        overlayButton->toggle();
     }
 }

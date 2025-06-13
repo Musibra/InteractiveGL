@@ -12,14 +12,20 @@
 #include <wx/image.h>
 
 CanvasOverlayButton::CanvasOverlayButton(int x, int y, int width_, int height_)
-    : posX(x), posY(y), width(width_), height(height_) {}
+    : posX(x), posY(y), width(width_), height(height_) {
+}
 
 CanvasOverlayButton::~CanvasOverlayButton() {
-    if (shaderProgram) glDeleteProgram(shaderProgram);
-    if (texture1) glDeleteTextures(1, &texture1);
-    if (texture2) glDeleteTextures(1, &texture2);
-    if (vbo) glDeleteBuffers(1, &vbo);
-    if (vao) glDeleteVertexArrays(1, &vao);
+    if(shaderProgram)
+        glDeleteProgram(shaderProgram);
+    if(texture1)
+        glDeleteTextures(1, &texture1);
+    if(texture2)
+        glDeleteTextures(1, &texture2);
+    if(vbo)
+        glDeleteBuffers(1, &vbo);
+    if(vao)
+        glDeleteVertexArrays(1, &vao);
 }
 
 bool CanvasOverlayButton::initGL() {
@@ -55,7 +61,7 @@ bool CanvasOverlayButton::initGL() {
     )";
 
     shaderProgram = linkProgram(vertSrc, fragSrc);
-    if (!shaderProgram) return false;
+    if(!shaderProgram) return false;
 
     float vertices[] = {
         0.0f, 0.0f, 0.0f, 0.0f,
@@ -63,7 +69,7 @@ bool CanvasOverlayButton::initGL() {
         1.0f, 1.0f, 1.0f, 1.0f,
         0.0f, 1.0f, 0.0f, 1.0f
     };
-    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+    unsigned int indices[] = {0, 1, 2, 2, 3, 0};
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
@@ -86,8 +92,8 @@ bool CanvasOverlayButton::initGL() {
     glBindVertexArray(0);
     glDeleteBuffers(1, &ebo);
 
-    if (!loadTextureFromFile("assets/icon1.png", texture1)) return false;
-    if (!loadTextureFromFile("assets/icon2.png", texture2)) return false;
+    if(!loadTextureFromFile("assets/icon1.png", texture1)) return false;
+    if(!loadTextureFromFile("assets/icon2.png", texture2)) return false;
 
     return true;
 }
@@ -100,9 +106,10 @@ void CanvasOverlayButton::draw(int windowWidth, int windowHeight) {
     glBindTexture(GL_TEXTURE_2D, activeTexture);
     glUniform1i(glGetUniformLocation(shaderProgram, "uTexture"), 0);
 
-    glUniform2f(glGetUniformLocation(shaderProgram, "uScreenSize"), (float)windowWidth, (float)windowHeight);
-    glUniform2f(glGetUniformLocation(shaderProgram, "uPos"), (float)posX, (float)posY);
-    glUniform2f(glGetUniformLocation(shaderProgram, "uSize"), (float)width, (float)height);
+    glUniform2f(glGetUniformLocation(shaderProgram, "uScreenSize"), static_cast<float>(windowWidth),
+                static_cast<float>(windowHeight));
+    glUniform2f(glGetUniformLocation(shaderProgram, "uPos"), static_cast<float>(posX), static_cast<float>(posY));
+    glUniform2f(glGetUniformLocation(shaderProgram, "uSize"), static_cast<float>(width), static_cast<float>(height));
 
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -117,14 +124,14 @@ void CanvasOverlayButton::toggle() {
 
 bool CanvasOverlayButton::hitTest(int mouseX, int mouseY) const {
     return (mouseX >= posX && mouseX <= posX + width &&
-            mouseY >= posY && mouseY <= posY + height);
+        mouseY >= posY && mouseY <= posY + height);
 }
 
 bool CanvasOverlayButton::loadTextureFromFile(const std::string& filePath, GLuint& outTexture) {
     wxImage img;
-    if (!img.LoadFile(filePath, wxBITMAP_TYPE_PNG)) return false;
+    if(!img.LoadFile(filePath, wxBITMAP_TYPE_PNG)) return false;
 
-    if (!img.HasAlpha()) img.InitAlpha();
+    if(!img.HasAlpha()) img.InitAlpha();
     img = img.Mirror(false);
 
     int width = img.GetWidth();
@@ -132,10 +139,10 @@ bool CanvasOverlayButton::loadTextureFromFile(const std::string& filePath, GLuin
     unsigned char* rgb = img.GetData();
     unsigned char* alpha = img.GetAlpha();
 
-    if (!rgb || !alpha) return false;
+    if(!rgb || !alpha) return false;
 
     std::vector<unsigned char> rgbaData(width * height * 4);
-    for (int i = 0; i < width * height; ++i) {
+    for(int i = 0; i < width * height; ++i) {
         rgbaData[i * 4 + 0] = rgb[i * 3 + 0];
         rgbaData[i * 4 + 1] = rgb[i * 3 + 1];
         rgbaData[i * 4 + 2] = rgb[i * 3 + 2];
@@ -164,7 +171,7 @@ GLuint CanvasOverlayButton::compileShader(GLenum type, const char* src) {
     glCompileShader(shader);
     GLint success;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
+    if(!success) {
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, nullptr, infoLog);
         std::cerr << "Shader compilation failed:\n" << infoLog << std::endl;
@@ -175,10 +182,10 @@ GLuint CanvasOverlayButton::compileShader(GLenum type, const char* src) {
 
 GLuint CanvasOverlayButton::linkProgram(const char* vertSrc, const char* fragSrc) {
     GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertSrc);
-    if (!vertexShader) return 0;
+    if(!vertexShader) return 0;
 
     GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragSrc);
-    if (!fragmentShader) {
+    if(!fragmentShader) {
         glDeleteShader(vertexShader);
         return 0;
     }
@@ -190,7 +197,7 @@ GLuint CanvasOverlayButton::linkProgram(const char* vertSrc, const char* fragSrc
 
     GLint success;
     glGetProgramiv(program, GL_LINK_STATUS, &success);
-    if (!success) {
+    if(!success) {
         char infoLog[512];
         glGetProgramInfoLog(program, 512, nullptr, infoLog);
         std::cerr << "Program linking failed:\n" << infoLog << std::endl;
