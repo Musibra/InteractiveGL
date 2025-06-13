@@ -21,7 +21,6 @@ public:
 private:
     GLuint vao{}, vbo{};
     GLuint shaderProgram{};
-    float color[3]{};
     std::vector<float> vBuffer;
 
     static GLuint compileShader(GLenum type, const char* src);

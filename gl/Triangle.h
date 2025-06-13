@@ -19,7 +19,8 @@ private:
     std::vector<float> vBuffer;
     GLuint vao{}, vbo{}, shaderProgram{};
 
-    void initGL();
+    bool initGL();
+    GLint locModel, locView, locProj;
     static GLuint compileShader(GLenum type, const char* src);
     static GLuint linkProgram(const char* vertSrc, const char* fragSrc);
 };

@@ -1,33 +1,32 @@
 #include "Triangle.h"
 
-Triangle::Triangle() {
+Triangle::Triangle()
+    : vao(0), vbo(0), locModel(-1), locView(-1), locProj(-1) {
     vBuffer = {
         //  x     y     z     r     g     b
         0.0f, 0.5f, 0.0f, 0.7f, 0.5f, 0.3f,
         -0.5f, -0.5f, 0.0f, 0.7f, 0.5f, 0.3f,
         0.5f, -0.5f, 0.0f, 0.7f, 0.5f, 0.3f,
     };
-    initGL();
+    if (!initGL()) {
+        std::cerr << "Failed to initialize Triangle GL resources.\n";
+    }
 }
 
 Triangle::~Triangle() {
-    glDeleteProgram(shaderProgram);
-    glDeleteBuffers(1, &vbo);
-    glDeleteVertexArrays(1, &vao);
+    if (shaderProgram) glDeleteProgram(shaderProgram);
+    if (vbo) glDeleteBuffers(1, &vbo);
+    if (vao) glDeleteVertexArrays(1, &vao);
 }
 
-void Triangle::initGL() {
+bool  Triangle::initGL() {
     std::string vertSrc = ShaderLoader::getShaderCode("shaders/Triangle.vert");
     std::string fragSrc = ShaderLoader::getShaderCode("shaders/Triangle.frag");
 
-    // print the shader source code for debugging
-    std::cout << "Vertex Shader Source:\n" << vertSrc << std::endl;
-    std::cout << "Fragment Shader Source:\n" << fragSrc << std::endl;
-
     shaderProgram = linkProgram(vertSrc.c_str(), fragSrc.c_str());
-    if(!shaderProgram) {
-        std::cerr << "Shader program failed to compile/link!" << std::endl;
-        return;
+    if (!shaderProgram) {
+        std::cerr << "Shader program failed to compile/link!\n";
+        return false;
     }
 
     glGenVertexArrays(1, &vao);
@@ -37,36 +36,38 @@ void Triangle::initGL() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vBuffer.size() * sizeof(float), vBuffer.data(), GL_STATIC_DRAW);
 
-    // Pozisyon: 3 float (vec3)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), static_cast<void*>(nullptr));
     glEnableVertexAttribArray(0);
 
-    // Renk: 3 float (vec3)
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    locModel = glGetUniformLocation(shaderProgram, "u_ModelMatrix");
+    locView = glGetUniformLocation(shaderProgram, "u_ViewMatrix");
+    locProj = glGetUniformLocation(shaderProgram, "u_ProjectionMatrix");
+
+    if(locModel == -1 || locView == -1 || locProj == -1) {
+        std::cerr << "Warning: could not get uniform locations\n";
+    }
+    return true;
 }
 
 void Triangle::draw(const glm::mat4& model, const glm::mat4& view, const glm::mat4& projection) const {
+    if (!shaderProgram || !vao) return;
+
     glUseProgram(shaderProgram);
-
-    GLint modelLoc = glGetUniformLocation(shaderProgram, "u_ModelMatrix");
-    GLint viewLoc = glGetUniformLocation(shaderProgram, "u_ViewMatrix");
-    GLint projLoc = glGetUniformLocation(shaderProgram, "u_ProjectionMatrix");
-
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(locModel, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(locView, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(locProj, 1, GL_FALSE, glm::value_ptr(projection));
 
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-
     glUseProgram(0);
 }
-
 
 GLuint Triangle::compileShader(GLenum type, const char* src) {
     GLuint shader = glCreateShader(type);

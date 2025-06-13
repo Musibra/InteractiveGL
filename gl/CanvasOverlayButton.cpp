@@ -3,64 +3,21 @@
 //
 
 #include "CanvasOverlayButton.h"
-#include <iostream>
-#include <vector>
-#include <wx/image.h>  // wxWidgets image loading
-#include "CanvasOverlayButton.h"
-#include <iostream>
-#include <vector>
-#include <wx/image.h>
+
 
 CanvasOverlayButton::CanvasOverlayButton(int x, int y, int width_, int height_)
     : posX(x), posY(y), width(width_), height(height_) {
 }
 
 CanvasOverlayButton::~CanvasOverlayButton() {
-    if(shaderProgram)
-        glDeleteProgram(shaderProgram);
-    if(texture1)
-        glDeleteTextures(1, &texture1);
-    if(texture2)
-        glDeleteTextures(1, &texture2);
-    if(vbo)
-        glDeleteBuffers(1, &vbo);
-    if(vao)
-        glDeleteVertexArrays(1, &vao);
+    releaseResources();
 }
 
 bool CanvasOverlayButton::initGL() {
-    const char* vertSrc = R"(
-        #version 330 core
-        layout(location = 0) in vec2 aPos;
-        layout(location = 1) in vec2 aTexCoord;
+    std::string vertSrc = ShaderLoader::getShaderCode("shaders/Button.vert");
+    std::string fragSrc = ShaderLoader::getShaderCode("shaders/Button.frag");
 
-        out vec2 TexCoord;
-
-        uniform vec2 uScreenSize;
-        uniform vec2 uPos;
-        uniform vec2 uSize;
-
-        void main() {
-            vec2 pos = aPos * uSize + uPos;
-            vec2 ndc = pos / uScreenSize * 2.0 - 1.0;
-            ndc.y = -ndc.y;
-            gl_Position = vec4(ndc, 0.0, 1.0);
-            TexCoord = aTexCoord;
-        }
-    )";
-
-    const char* fragSrc = R"(
-        #version 330 core
-        in vec2 TexCoord;
-        out vec4 FragColor;
-        uniform sampler2D uTexture;
-        void main() {
-            FragColor = texture(uTexture, TexCoord);
-            if (FragColor.a < 0.1) discard;
-        }
-    )";
-
-    shaderProgram = linkProgram(vertSrc, fragSrc);
+    shaderProgram = linkProgram(vertSrc.c_str(), fragSrc.c_str());
     if(!shaderProgram) return false;
 
     float vertices[] = {
@@ -211,3 +168,27 @@ GLuint CanvasOverlayButton::linkProgram(const char* vertSrc, const char* fragSrc
     glDeleteShader(fragmentShader);
     return program;
 }
+
+void CanvasOverlayButton::releaseResources() {
+    if (shaderProgram) {
+        glDeleteProgram(shaderProgram);
+        shaderProgram = 0;
+    }
+    if (texture1) {
+        glDeleteTextures(1, &texture1);
+        texture1 = 0;
+    }
+    if (texture2) {
+        glDeleteTextures(1, &texture2);
+        texture2 = 0;
+    }
+    if (vbo) {
+        glDeleteBuffers(1, &vbo);
+        vbo = 0;
+    }
+    if (vao) {
+        glDeleteVertexArrays(1, &vao);
+        vao = 0;
+    }
+}
+

@@ -37,7 +37,6 @@ private:
     GLuint buttonTexture = 0;
     wxRect buttonRect;
 
-
     void OnPaint(wxPaintEvent& event);
     void OnResize(wxSizeEvent& event);
     void OnMouse(wxMouseEvent& event);

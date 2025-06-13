@@ -56,8 +56,11 @@ Canvas::Canvas(wxWindow* parent)
 }
 
 void Canvas::OnPaint(wxPaintEvent& WXUNUSED(event)) {
+#ifdef _WIN32
     wxPaintDC dc(this);
+#endif
     SetCurrent(*context);
+
     glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -117,7 +120,8 @@ void Canvas::setShowTriangle(bool show) {
 }
 
 void Canvas::OnMouse(wxMouseEvent& event) {
-    if(const wxPoint pos = event.GetPosition(); buttonRect.Contains(pos) && onButtonClick) {
+    wxPoint pos = event.GetPosition();
+    if (buttonRect.Contains(pos) && onButtonClick) {
         onButtonClick();
         overlayButton->toggle();
     }

@@ -8,6 +8,10 @@
 #include <glad/glad.h>
 #include <string>
 #include <iostream>
+#include "ShaderLoader.h"
+#include "CanvasOverlayButton.h"
+#include <vector>
+#include <wx/image.h>
 
 class CanvasOverlayButton {
 public:
@@ -19,6 +23,7 @@ public:
     void setPosition(int x, int y);
     void toggle();
     [[nodiscard]] bool hitTest(int mouseX, int mouseY) const;
+    void releaseResources();
 
 private:
     int posX, posY;
