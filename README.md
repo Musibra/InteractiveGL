@@ -16,7 +16,13 @@ This project depends on the following libraries and tools:
 
 > On Windows, required wxWidgets `.dll` files are automatically copied to the build output directory after build.  
 
-
+## Build Steps for windows
+1. Clone the project
+2. mkdir build
+3. cd build
+4. cmake ..
+5. cmake --build . --config Release
+   
 ---
 
 # Third-Party Licenses
