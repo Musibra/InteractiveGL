@@ -19,9 +19,18 @@ This project depends on the following libraries and tools:
 
 ---
 
-This project makes use of the following open-source libraries:
-wxWidgets — Licensed under the wxWindows Library Licence.
-GLAD — Licensed under the MIT License.
-GLM — Licensed under the MIT License.
+# Third-Party Licenses
 
+This project uses the following open-source libraries:
+
+- **[wxWidgets](https://www.wxwidgets.org/)**  
+  Licensed under the [wxWindows Library Licence](https://www.wxwidgets.org/about/licence/).
+
+- **[GLAD](https://github.com/Dav1dde/glad)**  
+  Licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+- **[GLM](https://github.com/g-truc/glm)**  
+  Licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
+-**Icons** used in this project are provided by [Icons8](https://icons8.com)
 
